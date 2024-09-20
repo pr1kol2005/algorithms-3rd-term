@@ -3,28 +3,27 @@
 
 template <typename T>
 using TwoDimVector = std::vector<std::vector<T>>;
-using BigInt = unsigned long long;
 
 const int kModulo = 1000003;
 
 class Matrix {
   size_t n_;
   size_t m_;
-  TwoDimVector<BigInt> buffer_;
+  TwoDimVector<uint64_t> buffer_;
 
  public:
-  Matrix(int n, int m, TwoDimVector<BigInt> data)
+  Matrix(int n, int m, TwoDimVector<uint64_t> data)
       : n_(n), m_(m), buffer_(data) {}
 
-  TwoDimVector<BigInt> Data() { return buffer_; }
+  TwoDimVector<uint64_t> Data() { return buffer_; }
 
   friend Matrix Multi(Matrix a, Matrix b);
 
-  friend Matrix BinPow(Matrix a, BigInt p);
+  friend Matrix BinPow(Matrix a, uint64_t p);
 };
 
 Matrix Multi(Matrix a, Matrix b) {
-  Matrix c(a.n_, b.m_, {a.n_, std::vector<BigInt>(b.m_, 0)});
+  Matrix c(a.n_, b.m_, {a.n_, std::vector<uint64_t>(b.m_, 0)});
   for (int i = 0; i < a.n_; i++) {
     for (int j = 0; j < b.m_; j++) {
       for (int k = 0; k < a.m_; k++) {
@@ -35,8 +34,8 @@ Matrix Multi(Matrix a, Matrix b) {
   return c;
 }
 
-Matrix BinPow(Matrix a, BigInt p) {
-  Matrix b(a.n_, a.n_, {a.n_, std::vector<BigInt>(a.n_, 0)});
+Matrix BinPow(Matrix a, uint64_t p) {
+  Matrix b(a.n_, a.n_, {a.n_, std::vector<uint64_t>(a.n_, 0)});
   for (int i = 0; i < b.n_; i++) {
     b.buffer_[i][i] = 1;
   }
@@ -52,7 +51,7 @@ Matrix BinPow(Matrix a, BigInt p) {
   return b;
 }
 
-void SolveProblem(BigInt n) {
+void SolveProblem(uint64_t n) {
   Matrix a(5, 1, {{8}, {4}, {2}, {1}, {1}});
 
   Matrix t(5, 5,
@@ -70,7 +69,7 @@ void SolveProblem(BigInt n) {
 }
 
 int main() {
-  BigInt n = 0;
+  uint64_t n = 0;
 
   std::cin >> n;
 
