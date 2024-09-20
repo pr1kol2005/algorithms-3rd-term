@@ -1,4 +1,5 @@
 #include <iostream>
+#include <stdint.h>
 #include <vector>
 
 template <typename T>
