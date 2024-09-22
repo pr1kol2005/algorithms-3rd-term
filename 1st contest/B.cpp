@@ -18,17 +18,17 @@ class Matrix {
 
   TwoDimVector<uint64_t> Data() { return buffer_; }
 
-  friend Matrix Multi(Matrix a, Matrix b);
+  friend Matrix Multi(Matrix lhs, Matrix rhs);
 
   friend Matrix BinPow(Matrix a, uint64_t p);
 };
 
-Matrix Multi(Matrix a, Matrix b) {
-  Matrix c(a.n_, b.m_, {a.n_, std::vector<uint64_t>(b.m_, 0)});
-  for (int i = 0; i < a.n_; i++) {
-    for (int j = 0; j < b.m_; j++) {
-      for (int k = 0; k < a.m_; k++) {
-        c.buffer_[i][j] += (a.buffer_[i][k] * b.buffer_[k][j]) % kModulo;
+Matrix Multi(Matrix lhs, Matrix rhs) {
+  Matrix c(lhs.n_, rhs.m_, {lhs.n_, std::vector<uint64_t>(rhs.m_, 0)});
+  for (int i = 0; i < lhs.n_; i++) {
+    for (int j = 0; j < rhs.m_; j++) {
+      for (int k = 0; k < lhs.m_; k++) {
+        c.buffer_[i][j] += (lhs.buffer_[i][k] * rhs.buffer_[k][j]) % kModulo;
       }
     }
   }
@@ -36,20 +36,20 @@ Matrix Multi(Matrix a, Matrix b) {
 }
 
 Matrix BinPow(Matrix a, uint64_t p) {
-  Matrix b(a.n_, a.n_, {a.n_, std::vector<uint64_t>(a.n_, 0)});
-  for (int i = 0; i < b.n_; i++) {
-    b.buffer_[i][i] = 1;
+  Matrix result(a.n_, a.n_, {a.n_, std::vector<uint64_t>(a.n_, 0)});
+  for (int i = 0; i < result.n_; i++) {
+    result.buffer_[i][i] = 1;
   }
 
   while (p > 0) {
-    if (p & 1) {
-      b = Multi(b, a);
+    if (p % 2 == 1) {
+      result = Multi(result, a);
     }
     a = Multi(a, a);
-    p >>= 1;
+    p /= 2;
   }
 
-  return b;
+  return result;
 }
 
 void SolveProblem(uint64_t n) {
