@@ -6,10 +6,19 @@ template <typename T>
 using Matrix = std::vector<std::vector<T>>;
 using Pair = std::pair<size_t, size_t>;
 
-void FindLCS(std::string& first, std::string& second) {
-  first.shrink_to_fit();
-  second.shrink_to_fit();
+void PrintLCS(const std::vector<size_t>& lcs_first,
+              const std::vector<size_t>& lcs_second) {
+  for (auto lcs : {lcs_first, lcs_second}) {
+    for (auto i = lcs.rbegin(); i < lcs.rend(); i++) {
+      std::cout << *i + 1 << ' ';
+    }
+    std::cout << '\n';
+  }
+}
 
+size_t FindLCS(const std::string& first, const std::string& second,
+               std::vector<size_t>& lcs_first,
+               std::vector<size_t>& lcs_second) {
   Matrix<size_t> dp(first.size() + 1,
                     std::vector<size_t>(second.size() + 1, 0));
   Matrix<Pair> prev(first.size() + 1, std::vector<Pair>(second.size() + 1));
@@ -27,8 +36,6 @@ void FindLCS(std::string& first, std::string& second) {
     }
   }
 
-  std::vector<size_t> lcs_first;
-  std::vector<size_t> lcs_second;
   size_t k = first.size();
   size_t l = second.size();
 
@@ -45,24 +52,19 @@ void FindLCS(std::string& first, std::string& second) {
     }
   }
 
-  std::cout << dp[first.size()][second.size()] << '\n';
-
-  for (auto i = lcs_first.rbegin(); i < lcs_first.rend(); i++) {
-    std::cout << *i + 1 << ' ';
-  }
-  std::cout << '\n';
-
-  for (auto i = lcs_second.rbegin(); i < lcs_second.rend(); i++) {
-    std::cout << *i + 1 << ' ';
-  }
+  return dp[first.size()][second.size()];
 }
 
 int main() {
   std::string first;
   std::string second;
+  std::vector<size_t> lcs_first;
+  std::vector<size_t> lcs_second;
 
   std::cin >> first;
   std::cin >> second;
 
-  FindLCS(first, second);
+  std::cout << FindLCS(first, second, lcs_first, lcs_second) << '\n';
+
+  PrintLCS(lcs_first, lcs_second);
 }
