@@ -36,7 +36,7 @@ class Matrix {
   Matrix(int n, int m, const TwoDimVector<T>& data)
       : n_(n), m_(m), buffer_(data) {}
 
-  TwoDimVector<T> Data() { return buffer_; }
+  std::vector<T>& operator[](size_t i) { return buffer_[i]; }
 
   Matrix operator*(Matrix& rhs) {
     Matrix c(n_, rhs.m_, {n_, std::vector<T>(rhs.m_, 0)});
@@ -84,7 +84,7 @@ uint64_t ComputeFibonacci(uint64_t n) {
 
   Matrix<ModuloInt<kModulo>> result = transition_matrix_n * initial_row;
 
-  return result.Data()[4][0].value;
+  return result[4][0].value;
 }
 
 int main() {
