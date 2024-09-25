@@ -4,37 +4,26 @@
 
 template <typename T>
 using Matrix = std::vector<std::vector<T>>;
-using Pair = std::pair<size_t, size_t>;
 
-void PrintLCS(const std::vector<size_t>& lcs_first,
-              const std::vector<size_t>& lcs_second) {
-  for (auto lcs : {lcs_first, lcs_second}) {
-    for (auto i = lcs.rbegin(); i < lcs.rend(); i++) {
-      std::cout << *i + 1 << ' ';
-    }
-    std::cout << '\n';
+void PrintLCS(const std::vector<size_t>& lcs) {
+  for (auto i = lcs.rbegin(); i < lcs.rend(); i++) {
+    std::cout << *i + 1 << ' ';
   }
+  std::cout << '\n';
 }
 
-size_t FindLCS(const std::string& first, const std::string& second,
-               std::vector<size_t>& lcs_first,
-               std::vector<size_t>& lcs_second) {
+void FindLCS(const std::string& first, const std::string& second,
+             std::vector<size_t>& lcs_first, std::vector<size_t>& lcs_second) {
   Matrix<size_t> dp_lcs_of_prefixes(first.size() + 1,
                                     std::vector<size_t>(second.size() + 1, 0));
-  Matrix<Pair> prev(first.size() + 1, std::vector<Pair>(second.size() + 1));
 
   for (size_t i = 1; i <= first.size(); i++) {
     for (size_t j = 1; j <= second.size(); j++) {
       if (first[i - 1] == second[j - 1]) {
         dp_lcs_of_prefixes[i][j] = dp_lcs_of_prefixes[i - 1][j - 1] + 1;
-        prev[i][j] = Pair(i - 1, j - 1);
       } else {
         dp_lcs_of_prefixes[i][j] = std::max(dp_lcs_of_prefixes[i][j - 1],
                                             dp_lcs_of_prefixes[i - 1][j]);
-        prev[i][j] =
-            (dp_lcs_of_prefixes[i][j - 1] >= dp_lcs_of_prefixes[i - 1][j])
-                ? Pair(i, j - 1)
-                : Pair(i - 1, j);
       }
     }
   }
@@ -54,8 +43,6 @@ size_t FindLCS(const std::string& first, const std::string& second,
       --l;
     }
   }
-
-  return dp_lcs_of_prefixes[first.size()][second.size()];
 }
 
 int main() {
@@ -67,7 +54,10 @@ int main() {
   std::cin >> first;
   std::cin >> second;
 
-  std::cout << FindLCS(first, second, lcs_first, lcs_second) << '\n';
+  FindLCS(first, second, lcs_first, lcs_second);
 
-  PrintLCS(lcs_first, lcs_second);
+  std::cout << lcs_first.size() << '\n';
+
+  PrintLCS(lcs_first);
+  PrintLCS(lcs_second);
 }
