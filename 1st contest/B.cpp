@@ -8,7 +8,7 @@ using TwoDimVector = std::vector<std::vector<T>>;
 
 const int kModulo = 1000003;
 
-template <int M>
+template <int M = kModulo>
 struct ModuloInt {
   uint64_t value;
 
@@ -78,22 +78,20 @@ class Matrix {
 };
 
 uint64_t CountWays(uint64_t n) {
-  TwoDimVector<ModuloInt<kModulo>> initial_row_value = {
-      {8}, {4}, {2}, {1}, {1}};
+  TwoDimVector<ModuloInt<>> initial_row_value = {{8}, {4}, {2}, {1}, {1}};
 
-  Matrix<ModuloInt<kModulo>> initial_row(5, 1, initial_row_value);
+  Matrix<ModuloInt<>> initial_row(5, 1, initial_row_value);
 
-  Matrix<ModuloInt<kModulo>> transition_matrix(5, 5,
-                                               {{1, 1, 1, 1, 1},
-                                                {1, 0, 0, 0, 0},
-                                                {0, 1, 0, 0, 0},
-                                                {0, 0, 1, 0, 0},
-                                                {0, 0, 0, 1, 0}});
+  Matrix<ModuloInt<>> transition_matrix(5, 5,
+                                        {{1, 1, 1, 1, 1},
+                                         {1, 0, 0, 0, 0},
+                                         {0, 1, 0, 0, 0},
+                                         {0, 0, 1, 0, 0},
+                                         {0, 0, 0, 1, 0}});
 
-  Matrix<ModuloInt<kModulo>> transition_matrix_n =
-      transition_matrix.BinPow(n - 1);
+  Matrix<ModuloInt<>> transition_matrix_n = transition_matrix.BinPow(n - 1);
 
-  Matrix<ModuloInt<kModulo>> result = transition_matrix_n * initial_row;
+  Matrix<ModuloInt<>> result = transition_matrix_n * initial_row;
 
   return result[4][0].value;
 }
