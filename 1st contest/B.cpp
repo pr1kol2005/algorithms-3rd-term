@@ -14,7 +14,7 @@ struct ModuloInt {
 
   ModuloInt(int n) : value(n) {}
 
-  ModuloInt operator*(const ModuloInt& rhs) {
+  ModuloInt operator*(const ModuloInt& rhs) const {
     ModuloInt result = 0;
     result = (value * rhs.value) % M;
     return result;
@@ -28,49 +28,60 @@ struct ModuloInt {
 
 template <typename T>
 class Matrix {
-  size_t n_;
-  size_t m_;
-  TwoDimVector<T> buffer_;
-
  public:
+  Matrix(int n, int m) : n_(n), m_(m) {
+    buffer_ = TwoDimVector<T>(n, std::vector<T>(m, 0));
+  }
+
+  Matrix(int n, int m, const std::vector<T>& data) : Matrix(n, m) {
+    for (int i = 0; i < data.size(); i++) {
+      buffer_[i][i] = data[i];
+    }
+  }
+
   Matrix(int n, int m, const TwoDimVector<T>& data)
       : n_(n), m_(m), buffer_(data) {}
 
   std::vector<T>& operator[](size_t i) { return buffer_[i]; }
 
-  Matrix operator*(Matrix& rhs) {
-    Matrix c(n_, rhs.m_, {n_, std::vector<T>(rhs.m_, 0)});
+  Matrix operator*(const Matrix& rhs) const {
+    Matrix result(n_, rhs.m_);
     for (int i = 0; i < n_; i++) {
       for (int j = 0; j < rhs.m_; j++) {
         for (int k = 0; k < m_; k++) {
-          c.buffer_[i][j] += (buffer_[i][k] * rhs.buffer_[k][j]);
+          result.buffer_[i][j] += buffer_[i][k] * rhs.buffer_[k][j];
         }
       }
     }
-    return c;
+    return result;
   }
 
-  Matrix BinPow(uint64_t p) {
-    Matrix a(n_, m_, buffer_);
-    Matrix result(n_, n_, {n_, std::vector<T>(n_, 0)});
-    for (int i = 0; i < result.n_; i++) {
-      result.buffer_[i][i] = 1;
-    }
+  Matrix BinPow(uint64_t power) {
+    Matrix init(n_, m_, buffer_);
+    Matrix result(n_, n_, std::vector<T>(n_, 1));
 
-    while (p > 0) {
-      if (p % 2 == 1) {
-        result = result * a;
+    while (power > 0) {
+      if (power % 2 == 1) {
+        result = result * init;
       }
-      a = a * a;
-      p /= 2;
+      init = init * init;
+      power /= 2;
     }
 
     return result;
   }
+
+ private:
+  size_t n_;
+  size_t m_;
+  TwoDimVector<T> buffer_;
 };
 
-uint64_t ComputeFibonacci(uint64_t n) {
-  Matrix<ModuloInt<kModulo>> initial_row(5, 1, {{8}, {4}, {2}, {1}, {1}});
+uint64_t CountWays(uint64_t n) {
+  TwoDimVector<ModuloInt<kModulo>> initial_row_value = {
+      {8}, {4}, {2}, {1}, {1}};
+
+  Matrix<ModuloInt<kModulo>> initial_row(5, 1, initial_row_value);
 
   Matrix<ModuloInt<kModulo>> transition_matrix(5, 5,
                                                {{1, 1, 1, 1, 1},
@@ -92,5 +103,5 @@ int main() {
 
   std::cin >> n;
 
-  std::cout << ComputeFibonacci(n) << '\n';
+  std::cout << CountWays(n) << '\n';
 }
