@@ -56,7 +56,7 @@ class Matrix {
     return result;
   }
 
-  Matrix BinPow(uint64_t power) {
+  Matrix BinPow(uint64_t power) const {
     Matrix init(n_, m_, buffer_);
     Matrix result(n_, n_, std::vector<T>(n_, 1));
 
