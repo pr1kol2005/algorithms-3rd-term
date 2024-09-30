@@ -1,14 +1,25 @@
 #include <iostream>
 #include <vector>
 
-void PrintAnswer(const std::vector<int>& dp, const std::vector<int>& blocks) {
-  std::cout << dp[blocks.size()] << '\n';
+void PrintAnswer(const std::vector<int>& result) {
+  std::cout << result.size() << '\n';
+  for (auto i : result) {
+    std::cout << i << ' ';
+  }
+  std::cout << '\n';
+}
+
+std::vector<int> FindOutResult(const std::vector<int>& dp, const std::vector<int>& blocks) {
+  std::vector<int> result;
+
   for (size_t i = 1; i < blocks.size(); i++) {
     if (dp[i] < dp[i + 1]) {
-      std::cout << blocks[i - 1] << ' ';
+      result.push_back(blocks[i - 1]);
     }
   }
-  std::cout << *(blocks.end() - 1) << '\n';
+  result.push_back(blocks.back());
+
+  return result;
 }
 
 std::vector<int> CountConqueredBlocks(const std::vector<int>& blocks) {
@@ -29,9 +40,9 @@ std::vector<int> CountConqueredBlocks(const std::vector<int>& blocks) {
   }
 
   if (dp_less_more[blocks.size()] > dp_more_less[blocks.size()]) {
-    return dp_less_more;
+    return FindOutResult(dp_less_more, blocks);
   }
-  return dp_more_less;
+  return FindOutResult(dp_more_less, blocks);
 }
 
 int main() {
@@ -44,5 +55,5 @@ int main() {
     std::cin >> blocks[i];
   }
 
-  PrintAnswer(CountConqueredBlocks(blocks), blocks);
+  PrintAnswer(CountConqueredBlocks(blocks));
 }
