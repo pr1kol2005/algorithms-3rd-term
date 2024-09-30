@@ -9,7 +9,8 @@ void PrintAnswer(const std::vector<int>& result) {
   std::cout << '\n';
 }
 
-std::vector<int> FindOutResult(const std::vector<int>& dp, const std::vector<int>& blocks) {
+std::vector<int> FindOutResult(const std::vector<int>& dp,
+                               const std::vector<int>& blocks) {
   std::vector<int> result;
 
   for (size_t i = 1; i < blocks.size(); i++) {
