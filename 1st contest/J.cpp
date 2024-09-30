@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <iostream>
 #include <utility>
 #include <vector>
@@ -5,21 +6,26 @@
 template <typename T>
 using Matrix = std::vector<std::vector<T>>;
 
+struct LcsData {
+  std::vector<size_t> lcs_first;
+  std::vector<size_t> lcs_second;
+};
+
 void PrintLCS(const std::vector<size_t>& lcs) {
-  for (auto i = lcs.rbegin(); i < lcs.rend(); i++) {
+  for (auto i = lcs.begin(); i < lcs.end(); i++) {
     std::cout << *i + 1 << ' ';
   }
   std::cout << '\n';
 }
 
-void FindLCS(const std::string& first, const std::string& second,
-             std::vector<size_t>& lcs_first, std::vector<size_t>& lcs_second) {
-  Matrix<size_t> dp_lcs_of_prefixes(first.size() + 1,
-                                    std::vector<size_t>(second.size() + 1, 0));
+void FindLCS(const std::string& str_first, const std::string& str_second,
+             LcsData& answer) {
+  Matrix<size_t> dp_lcs_of_prefixes(
+      str_first.size() + 1, std::vector<size_t>(str_second.size() + 1, 0));
 
-  for (size_t i = 1; i <= first.size(); i++) {
-    for (size_t j = 1; j <= second.size(); j++) {
-      if (first[i - 1] == second[j - 1]) {
+  for (size_t i = 1; i <= str_first.size(); i++) {
+    for (size_t j = 1; j <= str_second.size(); j++) {
+      if (str_first[i - 1] == str_second[j - 1]) {
         dp_lcs_of_prefixes[i][j] = dp_lcs_of_prefixes[i - 1][j - 1] + 1;
       } else {
         dp_lcs_of_prefixes[i][j] = std::max(dp_lcs_of_prefixes[i][j - 1],
@@ -28,36 +34,41 @@ void FindLCS(const std::string& first, const std::string& second,
     }
   }
 
-  size_t k = first.size();
-  size_t l = second.size();
+  size_t current_elem_first = str_first.size();
+  size_t current_elem_second = str_second.size();
 
-  while (k > 0 && l > 0) {
-    if (first[k - 1] == second[l - 1]) {
-      lcs_first.push_back(k - 1);
-      lcs_second.push_back(l - 1);
-      --k;
-      --l;
-    } else if (dp_lcs_of_prefixes[k - 1][l] > dp_lcs_of_prefixes[k][l - 1]) {
-      --k;
+  while (current_elem_first > 0 && current_elem_second > 0) {
+    if (str_first[current_elem_first - 1] ==
+        str_second[current_elem_second - 1]) {
+      answer.lcs_first.push_back(current_elem_first - 1);
+      answer.lcs_second.push_back(current_elem_second - 1);
+      --current_elem_first;
+      --current_elem_second;
+    } else if (dp_lcs_of_prefixes[current_elem_first - 1][current_elem_second] >
+               dp_lcs_of_prefixes[current_elem_first]
+                                 [current_elem_second - 1]) {
+      --current_elem_first;
     } else {
-      --l;
+      --current_elem_second;
     }
   }
+
+  std::reverse(answer.lcs_first.begin(), answer.lcs_first.end());
+  std::reverse(answer.lcs_second.begin(), answer.lcs_second.end());
 }
 
 int main() {
-  std::string first;
-  std::string second;
-  std::vector<size_t> lcs_first;
-  std::vector<size_t> lcs_second;
+  std::string str_first;
+  std::string str_second;
+  LcsData answer;
 
-  std::cin >> first;
-  std::cin >> second;
+  std::cin >> str_first;
+  std::cin >> str_second;
 
-  FindLCS(first, second, lcs_first, lcs_second);
+  FindLCS(str_first, str_second, answer);
 
-  std::cout << lcs_first.size() << '\n';
+  std::cout << answer.lcs_first.size() << '\n';
 
-  PrintLCS(lcs_first);
-  PrintLCS(lcs_second);
+  PrintLCS(answer.lcs_first);
+  PrintLCS(answer.lcs_second);
 }
