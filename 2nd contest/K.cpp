@@ -1,4 +1,3 @@
-#include <cstdint>
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -7,9 +6,6 @@ template <typename T>
 using Matrix = std::vector<std::vector<T>>;
 
 struct Line {
-  int64_t k;
-  int64_t b;
-
   Line() = default;
   Line(int64_t k_, int64_t b_) : k(k_), b(b_) {}
 
@@ -27,12 +23,12 @@ struct Line {
     }
     return x;
   }
+
+  int64_t k;
+  int64_t b;
 };
 
 struct LowerConvexHull {
-  std::vector<Line> hull;
-  std::vector<int64_t> points;
-
   LowerConvexHull() = default;
 
   void AddLine(const Line& line) {
@@ -57,75 +53,50 @@ struct LowerConvexHull {
         std::lower_bound(points.begin(), points.end(), x) - points.begin() - 1;
     return hull[pos].GetY(x);
   }
+
+  std::vector<Line> hull;
+  std::vector<int64_t> points;
 };
 
-int64_t SolveProblem(int64_t n, int64_t k) {
+int64_t MinSumOfLengthSquares(int n, int k) {
   Matrix<int64_t> dp(
       n + 1, std::vector<int64_t>(k + 1, std::numeric_limits<int64_t>::max()));
-  int64_t result = 0;
 
   // dp[i][j] == optimal sum to cover i points with j segments
   // dp[0][j] = 0
   // dp[i != 0][0] = INF
 
-  for (int64_t j = 0; j <= k; j++) {
+  for (size_t j = 0; j <= k; j++) {
     dp[0][j] = 0;
   }
-
-  // for (int64_t j = 1; j <= k; j++) {
-  //   for (int64_t i = 1; i <= n; i++) {
-  //     for (int64_t p = 0; p < i; p++) {
-  //       if (dp[p][j - 1] == std::numeric_limits<int64_t>::max()) {
-  //         continue;
-  //       }
-  //       dp[i][j] = std::min(dp[i][j], dp[p][j - 1] + (i - p - 1) * (i - p -
-  //       1));
-  //     }
-  //   }
-  // }
 
   for (int64_t j = 1; j <= k; j++) {
     LowerConvexHull trick;
     for (int64_t i = 1; i <= n; i++) {
-      int64_t k = -2 * i;
-      int64_t b = 0;
+      int64_t line_k = -2 * i;
+      int64_t line_b = 0;
       if (dp[i - 1][j - 1] != std::numeric_limits<int64_t>::max()) {
-        b = dp[i - 1][j - 1] + i * i;
-        trick.AddLine({k, b});
+        line_b = dp[i - 1][j - 1] + i * i;
+        trick.AddLine({line_k, line_b});
       }
-      // std::cout << k << " | " << b << " | " << trick.GetMinY(i) << " | "  <<
-      // i * i << " | " << '\n';
       dp[i][j] = trick.GetMinY(i) + (i) * (i);
     }
   }
 
-  // for (int64_t i = 0; i <= n; i++) {
-  //   if (dp[i][1] < 0) {
-  //     std::cout << i << ' ' << dp[i - 1][1] << '\n';
-  //     break;
-  //   }
-  //   for (int64_t j = 0; j <= k; j++) {
-  //     std::cout << dp[i][j] << ' ';
-  //   }
-  //   std::cout << '\n';
-  // }
-
-  result = dp[n][k];
-
-  if (result == std::numeric_limits<int64_t>::max()) {
+  if (dp[n][k] == std::numeric_limits<int64_t>::max()) {
     return 0;
   }
-  return result;
+  return dp[n][k];
 }
 
 int main() {
-  int64_t n = 0;
-  int64_t k = 0;
+  int n = 0;
+  int k = 0;
 
   std::cin >> n;
   std::cin >> k;
 
-  std::cout << SolveProblem(n, k) << '\n';
+  std::cout << MinSumOfLengthSquares(n, k) << '\n';
 
   return 0;
 }
