@@ -1,18 +1,306 @@
+#include <algorithm>
 #include <iostream>
+#include <numeric>
+#include <string>
 #include <vector>
 
-int CountDistributions(const std::string& n, int m, int mod) {
-  return 0;
+template <typename T>
+using TwoDimVector = std::vector<std::vector<T>>;
+
+struct UBigInt {
+  const int kBase = 10;
+  const int kDivivsionOperand = 2;
+
+  std::vector<char> digits;
+
+  UBigInt() = default;
+
+  UBigInt(const std::string& str) {
+    for (auto it = str.rbegin(); it != str.rend(); it++) {
+      digits.push_back(*it - '0');
+    }
+  }
+
+  UBigInt(int num) : UBigInt(std::to_string(num)) {}
+
+  UBigInt(const UBigInt& other) : digits(other.digits) {}
+
+  UBigInt& operator=(const UBigInt& other) {
+    if (this != &other) {
+      digits = other.digits;
+    }
+    return *this;
+  }
+
+  friend std::istream& operator>>(std::istream& in, UBigInt& num) {
+    std::string str;
+    in >> str;
+    num = UBigInt(str);
+    return in;
+  }
+
+  friend std::ostream& operator<<(std::ostream& out, const UBigInt& num) {
+    for (auto it = num.digits.rbegin(); it != num.digits.rend(); it++) {
+      out << static_cast<char>(*it + '0');
+    }
+    return out;
+  }
+
+  void AddLastDigit(int num) {
+    std::reverse(digits.begin(), digits.end());
+    if (digits[0] == 0) {
+      digits.pop_back();
+    }
+    digits.push_back(num);
+    std::reverse(digits.begin(), digits.end());
+  }
+
+  UBigInt& operator-=(const UBigInt& rhs) {
+    int carry = 0;
+    for (size_t i = 0; i < digits.size(); i++) {
+      int64_t curr = 0;
+      if (i < digits.size()) {
+        curr += digits[i];
+      }
+      if (i < rhs.digits.size()) {
+        curr -= rhs.digits[i];
+      }
+      curr -= carry;
+      if (curr < 0) {
+        curr += kBase;
+        carry = 1;
+      } else {
+        carry = 0;
+      }
+      digits[i] = (curr % kBase);
+    }
+    while (digits.size() > 1 && digits.back() == 0) {
+      digits.pop_back();
+    }
+    return *this;
+  }
+
+  UBigInt& operator/=(const UBigInt&) {
+    if (*this == kDivivsionOperand - 1) {
+      *this = 0;
+      return *this;
+    }
+    if (*this == kDivivsionOperand - 1) {
+      *this = 1;
+      return *this;
+    }
+
+    int curr = 0;
+    UBigInt temp = 0;
+    std::vector<char> result;
+    int i = digits.size() - 1;
+
+    if (digits[i] < kDivivsionOperand) {
+      temp.AddLastDigit(digits[i]);
+      --i;
+    }
+
+    for (; i >= 0; --i) {
+      temp.AddLastDigit(digits[i]);
+      for (curr = kBase - 1; temp < curr * kDivivsionOperand; --curr) {
+      }
+      temp -= (curr * kDivivsionOperand);
+      result.push_back(curr);
+    }
+    digits = result;
+    std::reverse(digits.begin(), digits.end());
+    return *this;
+  }
+
+  int operator%(const UBigInt&) const {
+    int last_digit = digits.front();
+    return last_digit % kDivivsionOperand;
+  }
+
+  UBigInt operator-(const UBigInt&) const {
+    UBigInt result = *this;
+    result -= 1;
+    return result;
+  }
+
+  bool operator<(const UBigInt& rhs) const {
+    if (digits.size() != rhs.digits.size()) {
+      return digits.size() < rhs.digits.size();
+    }
+    for (int i = 0; i < digits.size(); i++) {
+      if (digits[i] != rhs.digits[i]) {
+        return digits[i] < rhs.digits[i];
+      }
+    }
+    return false;
+  }
+
+  bool operator==(const UBigInt& rhs) const {
+    if (digits.size() != rhs.digits.size()) {
+      return false;
+    }
+    for (int i = 0; i < digits.size(); i++) {
+      if (digits[i] != rhs.digits[i]) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  bool operator!=(const UBigInt& rhs) const { return !(*this == rhs); }
+};
+
+struct ModuloInt {
+  int value;
+  static int modulo;
+
+  ModuloInt(int n) : value(n) {}
+
+  ModuloInt operator*(const ModuloInt& rhs) const {
+    ModuloInt result = 0;
+    result = (value * rhs.value) % modulo;
+    return result;
+  }
+
+  ModuloInt& operator+=(const ModuloInt& rhs) {
+    value = (value + rhs.value) % modulo;
+    return *this;
+  }
+};
+
+int ModuloInt::modulo = std::numeric_limits<int>::max();
+
+template <typename T>
+struct Matrix {
+  Matrix(int n, int m) : n_(n), m_(m) {
+    buffer_ = TwoDimVector<T>(n, std::vector<T>(m, 0));
+  }
+
+  Matrix(int n, int m, const std::vector<T>& data) : Matrix(n, m) {
+    for (int i = 0; i < data.size(); i++) {
+      buffer_[i][i] = data[i];
+    }
+  }
+
+  Matrix(int n, int m, const TwoDimVector<T>& data)
+      : n_(n), m_(m), buffer_(data) {}
+
+  std::vector<T>& operator[](size_t i) { return buffer_[i]; }
+
+  Matrix operator*(const Matrix& rhs) const {
+    Matrix result(n_, rhs.m_);
+    for (int i = 0; i < n_; i++) {
+      for (int j = 0; j < rhs.m_; j++) {
+        for (int k = 0; k < m_; k++) {
+          result.buffer_[i][j] += buffer_[i][k] * rhs.buffer_[k][j];
+        }
+      }
+    }
+    return result;
+  }
+
+  Matrix BinPow(UBigInt power) const {
+    Matrix init(n_, m_, buffer_);
+    Matrix result(n_, n_, std::vector<T>(n_, 1));
+
+    while (power != 0) {
+      if (power % 2 == 1) {
+        result = result * init;
+      }
+      init = init * init;
+      power /= 2;
+    }
+
+    return result;
+  }
+
+  friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
+    for (int i = 0; i < matrix.n_; i++) {
+      for (int j = 0; j < matrix.m_; j++) {
+        os << matrix.buffer_[i][j] << ' ';
+      }
+      os << '\n';
+    }
+    return os;
+  }
+
+  size_t n_;
+  size_t m_;
+  TwoDimVector<T> buffer_;
+};
+
+int No2x2Blocks(const std::vector<int>& mask,
+                const std::vector<int>& prev_mask) {
+  int prev_1 = -1;
+  int prev_2 = -1;
+  for (int i = 0; i < mask.size(); ++i) {
+    int curr_1 = mask[i];
+    int curr_2 = prev_mask[i];
+    if (prev_1 == prev_2 && curr_1 == curr_2 && curr_1 == prev_1) {
+      return 0;
+    }
+    prev_1 = curr_1;
+    prev_2 = curr_2;
+  }
+  return 1;
+}
+
+Matrix<ModuloInt> MakeInitMatrixForProblem(const Matrix<int>& lhs,
+                                           const Matrix<int>& rhs) {
+  Matrix<ModuloInt> result(lhs.n_, rhs.m_);
+  for (int i = 0; i < lhs.n_; i++) {
+    for (int j = 0; j < rhs.m_; j++) {
+      std::vector<int> prev_mask(lhs.m_, 0);
+      for (int k = 0; k < lhs.m_; k++) {
+        prev_mask[k] = rhs.buffer_[k][j];
+      }
+      result.buffer_[i][j] = No2x2Blocks(lhs.buffer_[i], prev_mask);
+    }
+  }
+  return result;
+}
+
+int CountVariants(UBigInt n, int m) {
+  Matrix<int> masks_vertical(1 << m, m);
+  Matrix<int> masks_horizontal(m, 1 << m);
+
+  for (int i = 0; i < masks_vertical.n_; ++i) {
+    for (int j = 0; j < masks_vertical.m_; ++j) {
+      masks_vertical.buffer_[i][j] = ((i >> j) & 1);
+    }
+  }
+
+  for (int i = 0; i < masks_horizontal.n_; ++i) {
+    for (int j = 0; j < masks_horizontal.m_; ++j) {
+      masks_horizontal.buffer_[i][j] = ((j >> i) & 1);
+    }
+  }
+
+  Matrix<ModuloInt> init_matrix =
+      MakeInitMatrixForProblem(masks_vertical, masks_horizontal);
+
+  Matrix<ModuloInt> result_matrix = init_matrix.BinPow(n - 1);
+
+  ModuloInt answer = 0;
+
+  for (int i = 0; i < init_matrix.n_; ++i) {
+    for (int j = 0; j < init_matrix.m_; ++j) {
+      answer += result_matrix.buffer_[i][j];
+    }
+  }
+
+  return answer.value;
 }
 
 int main() {
-  std::string n;
+  UBigInt n;
   int m = 0;
-  int mod = 0;
 
   std::cin >> n;
   std::cin >> m;
-  std::cin >> mod;
+  std::cin >> ModuloInt::modulo;
 
-  std::cout << CountDistributions(n, m, mod) << '\n';
+  std::cout << CountVariants(n, m) << '\n';
+
+  return 0;
 }
