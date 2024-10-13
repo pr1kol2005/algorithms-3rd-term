@@ -1,144 +1,196 @@
 #include <algorithm>
+#include <cmath>
+#include <cstdint>
 #include <iostream>
-#include <set>
-#include <stack>
+#include <numeric>
 #include <vector>
 
 template <typename T>
 using Matrix = std::vector<std::vector<T>>;
 
-template <typename T>
-using SetVector = std::vector<std::set<T>>;
-
-template <typename T>
-using StackSet = std::stack<std::set<T>>;
-
-template <typename T>
-using SetIt = std::set<T>::iterator;
-
-void InputComplement(Matrix<int>& adj_matrix_complement) {
-  for (size_t i = 0; i < adj_matrix_complement.size(); ++i) {
-    for (size_t j = 0; j < adj_matrix_complement.size(); ++j) {
+void InputMatrix(Matrix<bool>& adj_matrix) {
+  for (size_t i = 0; i < adj_matrix.size(); ++i) {
+    for (size_t j = 0; j < adj_matrix.size(); ++j) {
       char x;
       std::cin >> x;
-      adj_matrix_complement[i][j] = (i == j ? 0 : !(x - '0'));
+      bool value = (i == j ? 1 : x - '0');
+      adj_matrix[i][j] = value;
     }
   }
 }
 
-void OutputMatrix(const Matrix<int>& adj_matrix_complement) {
-  for (size_t i = 0; i < adj_matrix_complement.size(); ++i) {
-    for (size_t j = 0; j < adj_matrix_complement.size(); ++j) {
-      std::cout << adj_matrix_complement[i][j] << ' ';
+std::vector<int64_t> CreateAdjList(const Matrix<bool>& adj_matrix) {
+  std::vector<int64_t> adj_list(adj_matrix.size(), 0);
+  for (size_t i = 0; i < adj_matrix.size(); ++i) {
+    for (auto it = adj_matrix[i].rbegin(); it != adj_matrix[i].rend(); ++it) {
+      adj_list[i] = (adj_list[i] << 1) + *it;
+    }
+  }
+  return adj_list;
+}
+
+void DivideGraph(const Matrix<bool>& adj_matrix, Matrix<bool>& adj_matrix_1,
+                 Matrix<bool>& adj_matrix_2) {
+  int64_t division = (adj_matrix.size() + 1) / 2;
+  for (size_t i = 0; i < adj_matrix.size(); ++i) {
+    for (size_t j = 0; j < adj_matrix.size(); ++j) {
+      if (i < division && j < division) {
+        adj_matrix_1[i][j] = adj_matrix[i][j];
+      }
+      if (i >= division && j >= division) {
+        adj_matrix_2[i][j] = adj_matrix[i][j];
+      }
+      if (i == j) {
+        adj_matrix_1[i][j] = 1;
+        adj_matrix_2[i][j] = 1;
+      }
+    }
+  }
+}
+
+void OutputMatrix(const Matrix<bool>& adj_matrix) {
+  for (size_t i = 0; i < adj_matrix.size(); ++i) {
+    for (size_t j = 0; j < adj_matrix.size(); ++j) {
+      std::cout << adj_matrix[i][j] << ' ';
     }
     std::cout << '\n';
   }
 }
 
-SetVector<int> BronKerbosh(const Matrix<int>& adj_matrix_complement) {
-  std::set<int> max_clique_set;
-  std::set<int> possible_max_clique_members;
-  std::set<int> not_clique_members;
-  SetVector<int> max_cliques;
+bool Contains(int64_t mask, int64_t vertex) { return mask & (1ll << vertex); }
 
-  for (int u = 0; u < adj_matrix_complement.size(); u++) {
-    possible_max_clique_members.insert(u);
+std::vector<bool> GetCliques(const Matrix<bool>& adj_matrix,
+                             const std::vector<int64_t>& adj_list,
+                             int64_t part) {
+  int64_t max_mask = 0;
+  int offset = 0;
+  if (part == 0) {
+    max_mask = (1ll << adj_matrix.size()) - 1;
+    offset = 0;
+  } else {
+    max_mask = (1ll << ((adj_matrix.size() + 1) / 2)) - 1;
   }
+  if (part == 1) {
+    offset = 0;
+  } else if (part == 2) {
+    offset = (adj_matrix.size() + 1) / 2;
+  }
+  std::vector<bool> dp(max_mask + 1, false);
 
-  int u = 0;
-  std::stack<int> recursive_vertex_stack;
-  StackSet<int> recursive_set_stack;
-  SetIt<int> current_vertex_it;
+  dp[0] = true;
+  int last = -1;
 
-  while ((possible_max_clique_members.size() != 0) ||
-         (max_clique_set.size() != 0)) {
-    if (possible_max_clique_members.size() != 0) {
-      current_vertex_it = possible_max_clique_members.begin();
-      u = *current_vertex_it;
-
-      recursive_set_stack.push(max_clique_set);
-      recursive_set_stack.push(possible_max_clique_members);
-      recursive_set_stack.push(not_clique_members);
-      recursive_vertex_stack.push(u);
-
-      max_clique_set.insert(u);
-
-      for (int v = 0; v < adj_matrix_complement.size(); v++) {
-        if (adj_matrix_complement[u][v]) {
-          current_vertex_it = possible_max_clique_members.find(v);
-          if (current_vertex_it != possible_max_clique_members.end()) {
-            possible_max_clique_members.erase(current_vertex_it);
-          }
-          current_vertex_it = not_clique_members.find(v);
-          if (current_vertex_it != not_clique_members.end()) {
-            not_clique_members.erase(current_vertex_it);
-          }
-        }
-      }
-
-      current_vertex_it = possible_max_clique_members.find(u);
-      if (current_vertex_it != possible_max_clique_members.end()) {
-        possible_max_clique_members.erase(current_vertex_it);
-      }
-    } else {
-      if (not_clique_members.size() == 0) {
-        max_cliques.push_back(max_clique_set);
-      }
-
-      u = recursive_vertex_stack.top();
-      recursive_vertex_stack.pop();
-      not_clique_members = recursive_set_stack.top();
-      recursive_set_stack.pop();
-      possible_max_clique_members = recursive_set_stack.top();
-      recursive_set_stack.pop();
-      max_clique_set = recursive_set_stack.top();
-      recursive_set_stack.pop();
-
-      current_vertex_it = possible_max_clique_members.find(u);
-      if (current_vertex_it != possible_max_clique_members.end()) {
-        possible_max_clique_members.erase(current_vertex_it);
-      }
-
-      not_clique_members.insert(u);
+  for (int64_t mask = 1; mask <= max_mask; ++mask) {
+    if (mask == (1 << (last + 1))) {
+      last += 1;
     }
+
+    mask <<= offset;
+    last += offset;
+
+    int64_t prev_mask = mask ^ (1ll << last);
+
+    if ((adj_list[last] & mask) == mask) {
+      dp[mask >> offset] = dp[prev_mask >> offset];
+    }
+
+    last -= offset;
+    mask >>= offset;
   }
-  return max_cliques;
+
+  return dp;
 }
 
-int CountCliques(const SetVector<int>& max_cliques) {
-  int result = 0;
+std::vector<int64_t> HowManySubmasksAreCliques(
+    const Matrix<bool>& adj_matrix, const std::vector<int64_t>& adj_list) {
+  int64_t max_mask = (1ll << (adj_matrix.size() / 2)) - 1;
+  int offset = (adj_matrix.size() + 1) / 2;
+  std::vector<int64_t> dp(max_mask + 1, 0);
+  int last = -1;
 
-  for (auto it1 = max_cliques.begin(); it1 < max_cliques.end(); it1++) {
-    result += (1 << it1->size()) - 1;
-    // for (auto& vertex : *it1) {
-    //   std::cout << vertex + 1 << ' ';
-    // }
-    // std::cout << '\n';
-    // std::cout << (1 << it1->size()) - 1 << "|\n";
-    for (auto it2 = it1 + 1; it2 < max_cliques.end(); it2++) {
-      std::vector<int> intersection;
-      std::set_intersection(it1->begin(), it1->end(), it2->begin(),
-                                it2->end(), std::back_inserter(intersection));
-      result -= ((1 << intersection.size()) - 1);
-      //std::cout << (1 << intersection.size()) - 1 << "z\n";
+  dp[0] = 1;
+
+  for (int64_t mask = 1; mask <= max_mask; ++mask) {
+    if (mask == (1 << (last + 1))) {
+      last += 1;
+    }
+    mask <<= offset;
+    last += offset;
+
+    int64_t prev_mask = mask ^ (1ll << last);
+    int64_t prev_mask_2 = (mask & adj_list[last]) ^ (1ll << last);
+
+    dp[mask >> offset] = dp[prev_mask >> offset] + dp[prev_mask_2 >> offset];
+
+    last -= offset;
+    mask >>= offset;
+  }
+
+  return dp;
+}
+
+std::vector<uint32_t> MaxConnectedMaskInSecond(
+    const Matrix<bool>& adj_matrix, const std::vector<int64_t>& adj_list,
+    const std::vector<int64_t>& adj_list_all) {
+  uint32_t max_mask = (1ll << ((adj_matrix.size() + 1) / 2)) - 1;
+  std::vector<uint32_t> dp(max_mask + 1, 0);
+  int last = -1;
+  int offset = (adj_matrix.size() + 1) / 2;
+
+  dp[0] = (1ll << (adj_matrix.size() / 2)) - 1;
+
+  for (uint32_t mask = 1; mask <= max_mask; ++mask) {
+    if (mask == (1 << (last + 1))) {
+      last += 1;
+    }
+
+    uint32_t prev_mask = mask ^ (1ll << last);
+
+    dp[mask] = dp[prev_mask] & uint32_t(adj_list_all[last] >> offset);
+  }
+
+  return dp;
+}
+
+int64_t CountCliques(const Matrix<bool>& adj_matrix) {
+  int64_t n = adj_matrix.size();
+  std::vector<int64_t> adj_list = CreateAdjList(adj_matrix);
+
+  Matrix<bool> adj_matrix_1(n, std::vector<bool>(n));
+  Matrix<bool> adj_matrix_2(n, std::vector<bool>(n));
+  DivideGraph(adj_matrix, adj_matrix_1, adj_matrix_2);
+
+  std::vector<int64_t> adj_list_1 = CreateAdjList(adj_matrix_1);
+  std::vector<int64_t> adj_list_2 = CreateAdjList(adj_matrix_2);
+
+  std::vector<bool> is_clique_1 = GetCliques(adj_matrix_1, adj_list_1, 1);
+
+  std::vector<int64_t> subcliques_count_2 =
+      HowManySubmasksAreCliques(adj_matrix_2, adj_list_2);
+
+  std::vector<uint32_t> adj_cliques_1 =
+      MaxConnectedMaskInSecond(adj_matrix_1, adj_list_1, adj_list);
+
+  int64_t result = 0;
+  uint32_t max_mask = (1ll << ((n + 1) / 2)) - 1;
+
+  for (uint32_t mask = 0; mask <= max_mask; ++mask) {
+    if (is_clique_1[mask]) {
+      result += subcliques_count_2[adj_cliques_1[mask]];
     }
   }
 
-  return result + 1;
+  return result;
 }
 
 int main() {
-  int n;
+  int64_t n;
 
   std::cin >> n;
 
-  Matrix<int> adj_matrix_complement(n, std::vector<int>(n));
+  Matrix<bool> adj_matrix(n, std::vector<bool>(n));
 
-  InputComplement(adj_matrix_complement);
+  InputMatrix(adj_matrix);
 
-  // OutputMatrix(adj_matrix_complement);
-
-  std::cout << CountCliques(BronKerbosh(adj_matrix_complement)) << '\n';
-
-  return 0;
+  std::cout << CountCliques(adj_matrix) << '\n';
 }
