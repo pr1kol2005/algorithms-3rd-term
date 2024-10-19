@@ -97,10 +97,6 @@ SCC FindStronglyConnectedComponents(int n, Matrix<int>& adj_list,
 }
 
 int main() {
-  std::ios::sync_with_stdio(false);
-  std::cin.tie(nullptr);
-  std::cout.tie(nullptr);
-
   int n = 0;
   int m = 0;
   std::cin >> n >> m;
