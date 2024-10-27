@@ -1,4 +1,5 @@
 #include <algorithm>
+#include <cstdint>
 #include <iostream>
 #include <numeric>
 #include <string>
@@ -127,7 +128,7 @@ struct UBigInt {
     if (digits.size() != rhs.digits.size()) {
       return digits.size() < rhs.digits.size();
     }
-    for (int i = 0; i < digits.size(); i++) {
+    for (size_t i = 0; i < digits.size(); i++) {
       if (digits[i] != rhs.digits[i]) {
         return digits[i] < rhs.digits[i];
       }
@@ -139,7 +140,7 @@ struct UBigInt {
     if (digits.size() != rhs.digits.size()) {
       return false;
     }
-    for (int i = 0; i < digits.size(); i++) {
+    for (size_t i = 0; i < digits.size(); i++) {
       if (digits[i] != rhs.digits[i]) {
         return false;
       }
@@ -177,7 +178,7 @@ struct Matrix {
   }
 
   Matrix(int n, int m, const std::vector<T>& data) : Matrix(n, m) {
-    for (int i = 0; i < data.size(); i++) {
+    for (size_t i = 0; i < data.size(); i++) {
       buffer_[i][i] = data[i];
     }
   }
@@ -189,9 +190,9 @@ struct Matrix {
 
   Matrix operator*(const Matrix& rhs) const {
     Matrix result(n_, rhs.m_);
-    for (int i = 0; i < n_; i++) {
-      for (int j = 0; j < rhs.m_; j++) {
-        for (int k = 0; k < m_; k++) {
+    for (size_t i = 0; i < n_; i++) {
+      for (size_t j = 0; j < rhs.m_; j++) {
+        for (size_t k = 0; k < m_; k++) {
           result.buffer_[i][j] += buffer_[i][k] * rhs.buffer_[k][j];
         }
       }
@@ -215,8 +216,8 @@ struct Matrix {
   }
 
   friend std::ostream& operator<<(std::ostream& os, const Matrix& matrix) {
-    for (int i = 0; i < matrix.n_; i++) {
-      for (int j = 0; j < matrix.m_; j++) {
+    for (size_t i = 0; i < matrix.n_; i++) {
+      for (size_t j = 0; j < matrix.m_; j++) {
         os << matrix.buffer_[i][j] << ' ';
       }
       os << '\n';
@@ -233,7 +234,7 @@ int No2x2Blocks(const std::vector<int>& mask,
                 const std::vector<int>& prev_mask) {
   int prev_1 = -1;
   int prev_2 = -1;
-  for (int i = 0; i < mask.size(); ++i) {
+  for (size_t i = 0; i < mask.size(); ++i) {
     int curr_1 = mask[i];
     int curr_2 = prev_mask[i];
     if (prev_1 == prev_2 && curr_1 == curr_2 && curr_1 == prev_1) {
@@ -248,10 +249,10 @@ int No2x2Blocks(const std::vector<int>& mask,
 Matrix<ModuloInt> MakeInitMatrixForProblem(const Matrix<int>& lhs,
                                            const Matrix<int>& rhs) {
   Matrix<ModuloInt> result(lhs.n_, rhs.m_);
-  for (int i = 0; i < lhs.n_; i++) {
-    for (int j = 0; j < rhs.m_; j++) {
+  for (size_t i = 0; i < lhs.n_; i++) {
+    for (size_t j = 0; j < rhs.m_; j++) {
       std::vector<int> prev_mask(lhs.m_, 0);
-      for (int k = 0; k < lhs.m_; k++) {
+      for (size_t k = 0; k < lhs.m_; k++) {
         prev_mask[k] = rhs.buffer_[k][j];
       }
       result.buffer_[i][j] = No2x2Blocks(lhs.buffer_[i], prev_mask);
@@ -264,14 +265,14 @@ int CountVariants(UBigInt n, int m) {
   Matrix<int> masks_vertical(1 << m, m);
   Matrix<int> masks_horizontal(m, 1 << m);
 
-  for (int i = 0; i < masks_vertical.n_; ++i) {
-    for (int j = 0; j < masks_vertical.m_; ++j) {
+  for (uint32_t i = 0; i < masks_vertical.n_; ++i) {
+    for (uint32_t j = 0; j < masks_vertical.m_; ++j) {
       masks_vertical.buffer_[i][j] = ((i >> j) & 1);
     }
   }
 
-  for (int i = 0; i < masks_horizontal.n_; ++i) {
-    for (int j = 0; j < masks_horizontal.m_; ++j) {
+  for (uint32_t i = 0; i < masks_horizontal.n_; ++i) {
+    for (uint32_t j = 0; j < masks_horizontal.m_; ++j) {
       masks_horizontal.buffer_[i][j] = ((j >> i) & 1);
     }
   }
@@ -283,8 +284,8 @@ int CountVariants(UBigInt n, int m) {
 
   ModuloInt answer = 0;
 
-  for (int i = 0; i < init_matrix.n_; ++i) {
-    for (int j = 0; j < init_matrix.m_; ++j) {
+  for (size_t i = 0; i < init_matrix.n_; ++i) {
+    for (size_t j = 0; j < init_matrix.m_; ++j) {
       answer += result_matrix.buffer_[i][j];
     }
   }
