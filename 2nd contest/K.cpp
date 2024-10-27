@@ -59,34 +59,34 @@ struct LowerConvexHull {
 };
 
 int64_t MinSumOfLengthSquares(int n, int k) {
-  Matrix<int64_t> dp(
+  Matrix<int64_t> optimal_sum(
       n + 1, std::vector<int64_t>(k + 1, std::numeric_limits<int64_t>::max()));
 
-  // dp[i][j] == optimal sum to cover i points with j segments
-  // dp[0][j] = 0
-  // dp[i != 0][0] = INF
+  // optimal_sum[i][j] == optimal sum to cover i points with j segments
+  // optimal_sum[0][j] = 0
+  // optimal_sum[i != 0][0] = INF
 
   for (size_t j = 0; j <= k; j++) {
-    dp[0][j] = 0;
+    optimal_sum[0][j] = 0;
   }
 
-  for (int64_t j = 1; j <= k; j++) {
+  for (size_t j = 1; j <= k; j++) {
     LowerConvexHull trick;
     for (int64_t i = 1; i <= n; i++) {
       int64_t line_k = -2 * i;
       int64_t line_b = 0;
-      if (dp[i - 1][j - 1] != std::numeric_limits<int64_t>::max()) {
-        line_b = dp[i - 1][j - 1] + i * i;
+      if (optimal_sum[i - 1][j - 1] != std::numeric_limits<int64_t>::max()) {
+        line_b = optimal_sum[i - 1][j - 1] + i * i;
         trick.AddLine({line_k, line_b});
       }
-      dp[i][j] = trick.GetMinY(i) + (i) * (i);
+      optimal_sum[i][j] = trick.GetMinY(i) + (i) * (i);
     }
   }
 
-  if (dp[n][k] == std::numeric_limits<int64_t>::max()) {
+  if (optimal_sum[n][k] == std::numeric_limits<int64_t>::max()) {
     return 0;
   }
-  return dp[n][k];
+  return optimal_sum[n][k];
 }
 
 int main() {
