@@ -59,11 +59,9 @@ void OutputMatrix(const Matrix<bool>& adj_matrix) {
 
 bool Contains(int64_t mask, int64_t vertex) { return mask & (1ll << vertex); }
 
-std::vector<bool> GetCliques(const Matrix<bool>& adj_matrix,
-                             const std::vector<int64_t>& adj_list,
-                             int64_t part) {
-  int64_t max_mask = 0;
-  int offset = 0;
+void SetInitParametersForCliqueSearch(const Matrix<bool>& adj_matrix,
+                                      int64_t part, int64_t& max_mask,
+                                      size_t& offset) {
   if (part == 0) {
     max_mask = (1ll << adj_matrix.size()) - 1;
     offset = 0;
@@ -75,9 +73,17 @@ std::vector<bool> GetCliques(const Matrix<bool>& adj_matrix,
   } else if (part == 2) {
     offset = (adj_matrix.size() + 1) / 2;
   }
-  std::vector<bool> dp(max_mask + 1, false);
+}
 
-  dp[0] = true;
+std::vector<bool> GetCliques(const Matrix<bool>& adj_matrix,
+                             const std::vector<int64_t>& adj_list,
+                             int64_t part) {
+  int64_t max_mask = 0;
+  size_t offset = 0;
+  SetInitParametersForCliqueSearch(adj_matrix, part, max_mask, offset);
+  std::vector<bool> is_clique(max_mask + 1, false);
+
+  is_clique[0] = true;
   int last = -1;
 
   for (int64_t mask = 1; mask <= max_mask; ++mask) {
@@ -91,24 +97,24 @@ std::vector<bool> GetCliques(const Matrix<bool>& adj_matrix,
     int64_t prev_mask = mask ^ (1ll << last);
 
     if ((adj_list[last] & mask) == mask) {
-      dp[mask >> offset] = dp[prev_mask >> offset];
+      is_clique[mask >> offset] = is_clique[prev_mask >> offset];
     }
 
     last -= offset;
     mask >>= offset;
   }
 
-  return dp;
+  return is_clique;
 }
 
 std::vector<int64_t> HowManySubmasksAreCliques(
     const Matrix<bool>& adj_matrix, const std::vector<int64_t>& adj_list) {
   int64_t max_mask = (1ll << (adj_matrix.size() / 2)) - 1;
-  int offset = (adj_matrix.size() + 1) / 2;
-  std::vector<int64_t> dp(max_mask + 1, 0);
+  size_t offset = (adj_matrix.size() + 1) / 2;
+  std::vector<int64_t> subgraphs_that_cliques_count(max_mask + 1, 0);
   int last = -1;
 
-  dp[0] = 1;
+  subgraphs_that_cliques_count[0] = 1;
 
   for (int64_t mask = 1; mask <= max_mask; ++mask) {
     if (mask == (1 << (last + 1))) {
@@ -120,24 +126,26 @@ std::vector<int64_t> HowManySubmasksAreCliques(
     int64_t prev_mask = mask ^ (1ll << last);
     int64_t prev_mask_2 = (mask & adj_list[last]) ^ (1ll << last);
 
-    dp[mask >> offset] = dp[prev_mask >> offset] + dp[prev_mask_2 >> offset];
+    subgraphs_that_cliques_count[mask >> offset] =
+        subgraphs_that_cliques_count[prev_mask >> offset] +
+        subgraphs_that_cliques_count[prev_mask_2 >> offset];
 
     last -= offset;
     mask >>= offset;
   }
 
-  return dp;
+  return subgraphs_that_cliques_count;
 }
 
 std::vector<uint32_t> MaxConnectedMaskInSecond(
     const Matrix<bool>& adj_matrix, const std::vector<int64_t>& adj_list,
     const std::vector<int64_t>& adj_list_all) {
   uint32_t max_mask = (1ll << ((adj_matrix.size() + 1) / 2)) - 1;
-  std::vector<uint32_t> dp(max_mask + 1, 0);
+  std::vector<uint32_t> max_connected_from_second(max_mask + 1, 0);
   int last = -1;
-  int offset = (adj_matrix.size() + 1) / 2;
+  size_t offset = (adj_matrix.size() + 1) / 2;
 
-  dp[0] = (1ll << (adj_matrix.size() / 2)) - 1;
+  max_connected_from_second[0] = (1ll << (adj_matrix.size() / 2)) - 1;
 
   for (uint32_t mask = 1; mask <= max_mask; ++mask) {
     if (mask == (1 << (last + 1))) {
@@ -146,10 +154,11 @@ std::vector<uint32_t> MaxConnectedMaskInSecond(
 
     uint32_t prev_mask = mask ^ (1ll << last);
 
-    dp[mask] = dp[prev_mask] & uint32_t(adj_list_all[last] >> offset);
+    max_connected_from_second[mask] = max_connected_from_second[prev_mask] &
+                                      uint32_t(adj_list_all[last] >> offset);
   }
 
-  return dp;
+  return max_connected_from_second;
 }
 
 int64_t CountCliques(const Matrix<bool>& adj_matrix) {
@@ -184,7 +193,7 @@ int64_t CountCliques(const Matrix<bool>& adj_matrix) {
 }
 
 int main() {
-  int64_t n;
+  int n;
 
   std::cin >> n;
 
