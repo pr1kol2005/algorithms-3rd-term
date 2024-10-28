@@ -173,17 +173,17 @@ int ModuloInt::modulo = std::numeric_limits<int>::max();
 
 template <typename T>
 struct Matrix {
-  Matrix(int n, int m) : n_(n), m_(m) {
+  Matrix(size_t n, size_t m) : n_(n), m_(m) {
     buffer_ = TwoDimVector<T>(n, std::vector<T>(m, 0));
   }
 
-  Matrix(int n, int m, const std::vector<T>& data) : Matrix(n, m) {
+  Matrix(size_t n, size_t m, const std::vector<T>& data) : Matrix(n, m) {
     for (size_t i = 0; i < data.size(); i++) {
       buffer_[i][i] = data[i];
     }
   }
 
-  Matrix(int n, int m, const TwoDimVector<T>& data)
+  Matrix(size_t n, size_t m, const TwoDimVector<T>& data)
       : n_(n), m_(m), buffer_(data) {}
 
   std::vector<T>& operator[](size_t i) { return buffer_[i]; }
@@ -261,7 +261,7 @@ Matrix<ModuloInt> MakeInitMatrixForProblem(const Matrix<int>& lhs,
   return result;
 }
 
-int CountVariants(UBigInt n, int m) {
+int CountVariants(UBigInt n, size_t m) {
   Matrix<int> masks_vertical(1 << m, m);
   Matrix<int> masks_horizontal(m, 1 << m);
 
@@ -295,7 +295,7 @@ int CountVariants(UBigInt n, int m) {
 
 int main() {
   UBigInt n;
-  int m = 0;
+  size_t m = 0;
 
   std::cin >> n;
   std::cin >> m;
