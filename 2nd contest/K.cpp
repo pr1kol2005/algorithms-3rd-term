@@ -58,7 +58,7 @@ struct LowerConvexHull {
   std::vector<int64_t> points;
 };
 
-int64_t MinSumOfLengthSquares(int n, int k) {
+int64_t MinSumOfLengthSquares(size_t n, size_t k) {
   Matrix<int64_t> optimal_sum(
       n + 1, std::vector<int64_t>(k + 1, std::numeric_limits<int64_t>::max()));
 
@@ -90,11 +90,10 @@ int64_t MinSumOfLengthSquares(int n, int k) {
 }
 
 int main() {
-  int n = 0;
-  int k = 0;
+  size_t n = 0;
+  size_t k = 0;
 
-  std::cin >> n;
-  std::cin >> k;
+  std::cin >> n >> k;
 
   std::cout << MinSumOfLengthSquares(n, k) << '\n';
 
