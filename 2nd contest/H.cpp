@@ -193,7 +193,7 @@ int64_t CountCliques(const Matrix<bool>& adj_matrix) {
 }
 
 int main() {
-  int n;
+  size_t n;
 
   std::cin >> n;
 
