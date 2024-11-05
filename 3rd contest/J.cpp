@@ -15,6 +15,11 @@ using StrUnorderedSet = std::unordered_set<std::string>;
 
 using PairVector = std::vector<std::pair<int, int>>;
 
+const Matrix<int> goal = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
+const PairVector directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
+const std::string directions_letters = "RLDU";
+const std::string empty_string = "";
+
 struct Puzzle {
   Matrix<int> board;
   int x; // x coordinate of empty cell
@@ -30,15 +35,10 @@ struct Puzzle {
   }
 };
 
-const Matrix<int> goal = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
-const PairVector directions = {{0, 1}, {0, -1}, {1, 0}, {-1, 0}};
-const std::string directions_letters = "RLDU";
-const std::string empty_string = "";
-
 Matrix<int> InputBoard() {
   Matrix<int> board(3, std::vector<int>(3, 0));
-  for (int i = 0; i < 3; ++i) {
-    for (int j = 0; j < 3; ++j) {
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = 0; j < 3; ++j) {
       std::cin >> board[i][j];
     }
   }
@@ -119,7 +119,7 @@ void SolvePuzzle(const Matrix<int>& start) {
     }
     visited.insert(current_state);
 
-    for (int i = 0; i < 4; ++i) {
+    for (size_t i = 0; i < 4; ++i) {
       int new_x = current.x + directions[i].first;
       int new_y = current.y + directions[i].second;
 
@@ -139,6 +139,6 @@ int main() {
   if (IsSolvable(start)) {
     SolvePuzzle(start);
   } else {
-    std::cout << -1 << '\n';
+    std::cout << "-1\n";
   }
 }
