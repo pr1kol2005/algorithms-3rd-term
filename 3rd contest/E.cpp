@@ -7,27 +7,27 @@ template <typename T>
 using Matrix = std::vector<std::vector<T>>;
 
 struct SCC {
-  int count;
+  size_t count;
   std::vector<int> component;
 
-  SCC(int count_, std::vector<int> component_)
+  SCC(size_t count_, std::vector<int> component_)
       : count(count_), component(component_) {}
 
   void Output() const {
     std::cout << count << '\n';
-    for (int i = 1; i < component.size(); i++) {
+    for (size_t i = 1; i < component.size(); i++) {
       std::cout << component[i] << ' ';
     }
     std::cout << '\n';
   }
 };
 
-void MakeAdjastencyList(int vertice_num, int edge_num, Matrix<int>& adj_list,
+void MakeAdjastencyList(size_t vertice_num, size_t edge_num, Matrix<int>& adj_list,
                         Matrix<int>& transposed_adj_list) {
   adj_list.resize(vertice_num + 1);
   transposed_adj_list.resize(vertice_num + 1);
 
-  for (int i = 0; i < edge_num; i++) {
+  for (size_t i = 0; i < edge_num; i++) {
     int u = 0;
     int v = 0;
     std::cin >> u >> v;
@@ -52,7 +52,7 @@ void SortingDFS(int v, Matrix<int>& adj_list, std::vector<int>& color,
 
 void MarkingComponentDFS(int v, Matrix<int>& transposed_adj_list,
                          std::vector<int>& color, std::vector<int>& component,
-                         int component_count) {
+                         size_t component_count) {
   color[v] = 1;
   component[v] = component_count;
 
@@ -66,12 +66,12 @@ void MarkingComponentDFS(int v, Matrix<int>& transposed_adj_list,
   color[v] = 2;
 }
 
-SCC FindStronglyConnectedComponents(int n, Matrix<int>& adj_list,
+SCC FindStronglyConnectedComponents(size_t n, Matrix<int>& adj_list,
                                     Matrix<int>& transposed_adj_list) {
   std::vector<int> color(n + 1, 0);
   std::vector<int> component(n + 1, 0);
   std::stack<int> sorted_vertices;
-  int component_count = 0;
+  size_t component_count = 0;
 
   for (int i = 1; i <= n; i++) {
     if (color[i] == 0) {
@@ -97,8 +97,8 @@ SCC FindStronglyConnectedComponents(int n, Matrix<int>& adj_list,
 }
 
 int main() {
-  int n = 0;
-  int m = 0;
+  size_t n = 0;
+  size_t m = 0;
   std::cin >> n >> m;
 
   Matrix<int> adj_list;
