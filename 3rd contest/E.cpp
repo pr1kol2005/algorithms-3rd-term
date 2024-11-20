@@ -6,11 +6,11 @@
 template <typename T>
 using Matrix = std::vector<std::vector<T>>;
 
-struct SCC {
+struct StronglyConnectedComponent {
   size_t count;
   std::vector<int> component;
 
-  SCC(size_t count_, std::vector<int> component_)
+  StronglyConnectedComponent(size_t count_, std::vector<int> component_)
       : count(count_), component(component_) {}
 
   void Output() const {
@@ -28,11 +28,11 @@ void MakeAdjastencyList(size_t vertice_num, size_t edge_num, Matrix<int>& adj_li
   transposed_adj_list.resize(vertice_num + 1);
 
   for (size_t i = 0; i < edge_num; i++) {
-    int u = 0;
-    int v = 0;
-    std::cin >> u >> v;
-    adj_list[u].push_back(v);
-    transposed_adj_list[v].push_back(u);
+    int vertice_1 = 0;
+    int vertice_2 = 0;
+    std::cin >> vertice_1 >> vertice_2;
+    adj_list[vertice_1].push_back(vertice_2);
+    transposed_adj_list[vertice_2].push_back(vertice_1);
   }
 }
 
@@ -66,7 +66,7 @@ void MarkingComponentDFS(int v, Matrix<int>& transposed_adj_list,
   color[v] = 2;
 }
 
-SCC FindStronglyConnectedComponents(size_t n, Matrix<int>& adj_list,
+StronglyConnectedComponent FindStronglyConnectedComponents(size_t n, Matrix<int>& adj_list,
                                     Matrix<int>& transposed_adj_list) {
   std::vector<int> color(n + 1, 0);
   std::vector<int> component(n + 1, 0);
@@ -91,7 +91,7 @@ SCC FindStronglyConnectedComponents(size_t n, Matrix<int>& adj_list,
     }
   }
 
-  SCC answer(component_count, component);
+  StronglyConnectedComponent answer(component_count, component);
 
   return answer;
 }
@@ -105,7 +105,7 @@ int main() {
   Matrix<int> transposed_adj_list;
   MakeAdjastencyList(n, m, adj_list, transposed_adj_list);
 
-  SCC answer =
+  StronglyConnectedComponent answer =
       FindStronglyConnectedComponents(n, adj_list, transposed_adj_list);
 
   answer.Output();
