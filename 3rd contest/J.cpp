@@ -60,7 +60,7 @@ int CalculateDist(const Matrix<int>& board) {
   return dist;
 }
 
-bool IsSolvable(const Matrix<int>& board) {
+bool IsPuzzleSolvable(const Matrix<int>& board) {
   std::vector<int> board_flat;
   for (const auto& row : board) {
     for (const auto& cell : row) {
@@ -69,7 +69,7 @@ bool IsSolvable(const Matrix<int>& board) {
       }
     }
   }
-  int sum_of_bigger_before = 0;
+  size_t sum_of_bigger_before = 0;
   for (size_t i = 0; i < board_flat.size(); ++i) {
     for (size_t j = i + 1; j < board_flat.size(); ++j) {
       if (board_flat[i] > board_flat[j]) {
@@ -80,7 +80,7 @@ bool IsSolvable(const Matrix<int>& board) {
   return sum_of_bigger_before % 2 == 0;
 }
 
-void SolvePuzzle(const Matrix<int>& start) {
+void PrintSequncesOfMovesToSolve(const Matrix<int>& start) {
   PriorityQueue<Puzzle> pq;
   StrUnorderedSet visited;
 
@@ -136,8 +136,8 @@ void SolvePuzzle(const Matrix<int>& start) {
 int main() {
   Matrix<int> start = InputBoard();
 
-  if (IsSolvable(start)) {
-    SolvePuzzle(start);
+  if (IsPuzzleSolvable(start)) {
+    PrintSequncesOfMovesToSolve(start);
   } else {
     std::cout << "-1\n";
   }
