@@ -22,7 +22,7 @@ struct UBigInt {
     }
   }
 
-  UBigInt(int num) : UBigInt(std::to_string(num)) {}
+  UBigInt(int64_t num) : UBigInt(std::to_string(num)) {}
 
   UBigInt(const UBigInt& other) : digits(other.digits) {}
 
@@ -47,7 +47,7 @@ struct UBigInt {
     return out;
   }
 
-  void AddLastDigit(int num) {
+  void AddLastDigit(int64_t num) {
     std::reverse(digits.begin(), digits.end());
     if (digits[0] == 0) {
       digits.pop_back();
@@ -57,7 +57,7 @@ struct UBigInt {
   }
 
   UBigInt& operator-=(const UBigInt& rhs) {
-    int carry = 0;
+    int64_t carry = 0;
     for (size_t i = 0; i < digits.size(); i++) {
       int64_t curr = 0;
       if (i < digits.size()) {
@@ -91,10 +91,10 @@ struct UBigInt {
       return *this;
     }
 
-    int curr = 0;
+    int64_t curr = 0;
     UBigInt temp = 0;
     std::vector<char> result;
-    int i = digits.size() - 1;
+    int64_t i = digits.size() - 1;
 
     if (digits[i] < kDivivsionOperand) {
       temp.AddLastDigit(digits[i]);
@@ -113,8 +113,8 @@ struct UBigInt {
     return *this;
   }
 
-  int operator%(const UBigInt&) const {
-    int last_digit = digits.front();
+  int64_t operator%(const UBigInt&) const {
+    int64_t last_digit = digits.front();
     return last_digit % kDivivsionOperand;
   }
 
@@ -152,10 +152,10 @@ struct UBigInt {
 };
 
 struct ModuloInt {
-  int value;
-  static int modulo;
+  int64_t value;
+  static int64_t modulo;
 
-  ModuloInt(int n) : value(n) {}
+  ModuloInt(int64_t n) : value(n) {}
 
   ModuloInt operator*(const ModuloInt& rhs) const {
     ModuloInt result = 0;
@@ -169,7 +169,7 @@ struct ModuloInt {
   }
 };
 
-int ModuloInt::modulo = std::numeric_limits<int>::max();
+int64_t ModuloInt::modulo = std::numeric_limits<int64_t>::max();
 
 template <typename T>
 struct Matrix {
@@ -230,13 +230,13 @@ struct Matrix {
   TwoDimVector<T> buffer_;
 };
 
-int No2x2Blocks(const std::vector<int>& mask,
-                const std::vector<int>& prev_mask) {
-  int prev_1 = -1;
-  int prev_2 = -1;
+int64_t No2x2Blocks(const std::vector<int64_t>& mask,
+                const std::vector<int64_t>& prev_mask) {
+  int64_t prev_1 = -1;
+  int64_t prev_2 = -1;
   for (size_t i = 0; i < mask.size(); ++i) {
-    int curr_1 = mask[i];
-    int curr_2 = prev_mask[i];
+    int64_t curr_1 = mask[i];
+    int64_t curr_2 = prev_mask[i];
     if (prev_1 == prev_2 && curr_1 == curr_2 && curr_1 == prev_1) {
       return 0;
     }
@@ -246,12 +246,12 @@ int No2x2Blocks(const std::vector<int>& mask,
   return 1;
 }
 
-Matrix<ModuloInt> MakeInitMatrixForProblem(const Matrix<int>& lhs,
-                                           const Matrix<int>& rhs) {
+Matrix<ModuloInt> MakeInitMatrixForProblem(const Matrix<int64_t>& lhs,
+                                           const Matrix<int64_t>& rhs) {
   Matrix<ModuloInt> result(lhs.n_, rhs.m_);
   for (size_t i = 0; i < lhs.n_; i++) {
     for (size_t j = 0; j < rhs.m_; j++) {
-      std::vector<int> prev_mask(lhs.m_, 0);
+      std::vector<int64_t> prev_mask(lhs.m_, 0);
       for (size_t k = 0; k < lhs.m_; k++) {
         prev_mask[k] = rhs.buffer_[k][j];
       }
@@ -261,9 +261,9 @@ Matrix<ModuloInt> MakeInitMatrixForProblem(const Matrix<int>& lhs,
   return result;
 }
 
-int CountVariants(UBigInt n, size_t m) {
-  Matrix<int> masks_vertical(1 << m, m);
-  Matrix<int> masks_horizontal(m, 1 << m);
+int64_t CountVariants(UBigInt n, size_t m) {
+  Matrix<int64_t> masks_vertical(1 << m, m);
+  Matrix<int64_t> masks_horizontal(m, 1 << m);
 
   for (uint32_t i = 0; i < masks_vertical.n_; ++i) {
     for (uint32_t j = 0; j < masks_vertical.m_; ++j) {
