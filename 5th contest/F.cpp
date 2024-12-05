@@ -18,7 +18,8 @@ Matrix<std::size_t> MakeAdjacencyMatrix(std::size_t n) {
   return adj_matrix;
 }
 
-Matrix<std::size_t> BellmanFord(std::size_t n, Matrix<std::size_t> adj_matrix) {
+Matrix<std::size_t> BellmanFord(std::size_t n,
+                                const Matrix<std::size_t>& adj_matrix) {
   Matrix<std::size_t> dist = adj_matrix;
 
   for (std::size_t k = 0; k < n; ++k) {
@@ -34,6 +35,16 @@ Matrix<std::size_t> BellmanFord(std::size_t n, Matrix<std::size_t> adj_matrix) {
   return dist;
 }
 
+void DisplayShortestPaths(const Matrix<std::size_t>& shortest_paths,
+                          std::size_t n) {
+  for (std::size_t i = 0; i < n; ++i) {
+    for (std::size_t j = 0; j < n; ++j) {
+      std::cout << (shortest_paths[i][j] == kMaxPathLength ? 0 : 1) << ' ';
+    }
+    std::cout << '\n';
+  }
+}
+
 int main() {
   std::size_t n = 0;
   std::cin >> n;
@@ -41,12 +52,7 @@ int main() {
   Matrix<std::size_t> adj_matrix = MakeAdjacencyMatrix(n);
   Matrix<std::size_t> shortest_paths = BellmanFord(n, adj_matrix);
 
-  for (std::size_t i = 0; i < n; ++i) {
-    for (std::size_t j = 0; j < n; ++j) {
-      std::cout << (shortest_paths[i][j] == kMaxPathLength ? 0 : 1) << ' ';
-    }
-    std::cout << '\n';
-  }
+  DisplayShortestPaths(shortest_paths, n);
 
   return 0;
 }
