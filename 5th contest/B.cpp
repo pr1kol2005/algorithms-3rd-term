@@ -14,12 +14,12 @@ using PriorityQueue =
 PairMatrix MakeAdjacencyList(int64_t n, int64_t m) {
   std::vector<std::vector<std::pair<int64_t, int64_t>>> adj_list(n + 1);
   for (int64_t i = 0; i < m; i++) {
-    int64_t a = 0;
-    int64_t b = 0;
-    int64_t l = 0;
-    std::cin >> a >> b >> l;
-    adj_list[a].emplace_back(b, l);
-    adj_list[b].emplace_back(a, l);
+    int64_t from = 0;
+    int64_t to = 0;
+    int64_t length = 0;
+    std::cin >> from >> to >> length;
+    adj_list[from].emplace_back(to, length);
+    adj_list[to].emplace_back(from, length);
   }
   return adj_list;
 }
@@ -32,11 +32,11 @@ std::vector<int64_t> InputVirusSources(int64_t k) {
   return virus_sources;
 }
 
-std::vector<int64_t> DijkstrasAlgorithmWithInfection(
-    const PairMatrix& adj_list, std::vector<int64_t> virus_sources) {
+std::vector<int64_t> DijkstrasAlgorithmMultipleSources(
+    const PairMatrix& adj_list, std::vector<int64_t> multiple_sources) {
   std::vector<int64_t> dist(adj_list.size(), kInf);
   PriorityQueue pq;
-  for (int64_t s : virus_sources) {
+  for (int64_t s : multiple_sources) {
     dist[s] = 0;
     pq.emplace(0, s);
   }
@@ -62,31 +62,21 @@ std::vector<int64_t> DijkstrasAlgorithmWithInfection(
   return dist;
 }
 
-std::vector<int64_t> DijkstrasAlgorithm(const PairMatrix& adj_list, int64_t s) {
-  std::vector<int64_t> dist(adj_list.size(), kInf);
-  dist[s] = 0;
-  PriorityQueue pq;
-  pq.emplace(0, s);
+int64_t MinTimeToGetToCure(int64_t crewmate_start, int64_t cure_location,
+                           const PairMatrix& adj_list,
+                           const std::vector<int64_t>& virus_sources) {
+  std::vector<int64_t> infection_time =
+      DijkstrasAlgorithmMultipleSources(adj_list, virus_sources);
 
-  while (!pq.empty()) {
-    int64_t curr_dist = pq.top().first;
-    int64_t u = pq.top().second;
-    pq.pop();
+  std::vector<int64_t> crewmate_time =
+      DijkstrasAlgorithmMultipleSources(adj_list, {crewmate_start});
 
-    if (curr_dist > dist[u]) {
-      continue;
-    }
-
-    for (const auto& [v, weight] : adj_list[u]) {
-      int64_t new_weight = weight + curr_dist;
-      if (new_weight < dist[v]) {
-        dist[v] = new_weight;
-        pq.emplace(new_weight, v);
-      }
-    }
+  if ((crewmate_time[cure_location] >= infection_time[cure_location] &&
+       infection_time[cure_location] != kInf) ||
+      crewmate_time[cure_location] == kInf) {
+    return -1;
   }
-
-  return dist;
+  return crewmate_time[cure_location];
 }
 
 int main() {
@@ -99,21 +89,13 @@ int main() {
 
   PairMatrix adj_list = MakeAdjacencyList(n, m);
 
-  int64_t s = 0;
-  int64_t t = 0;
-  std::cin >> s >> t;
+  int64_t crewmate_start = 0;
+  int64_t cure_location = 0;
+  std::cin >> crewmate_start >> cure_location;
 
-  std::vector<int64_t> infection_time =
-      DijkstrasAlgorithmWithInfection(adj_list, virus_sources);
-
-  std::vector<int64_t> crewmate_time = DijkstrasAlgorithm(adj_list, s);
-
-  if ((crewmate_time[t] >= infection_time[t] && infection_time[t] != kInf) ||
-      crewmate_time[t] == kInf) {
-    std::cout << "-1\n";
-  } else {
-    std::cout << crewmate_time[t] << '\n';
-  }
+  std::cout << MinTimeToGetToCure(crewmate_start, cure_location, adj_list,
+                                  virus_sources)
+            << '\n';
 
   return 0;
 }
