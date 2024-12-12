@@ -9,10 +9,13 @@ const int kMaxCapacity = 201;
 
 struct Graph {
   Matrix<int> capacity_matrix;
+  size_t vertice_count;
 
   Graph() = default;
 
-  explicit Graph(int size) : capacity_matrix(size + 1, std::vector<int>(size + 1, 0)) {}
+  explicit Graph(size_t size)
+      : capacity_matrix(size + 1, std::vector<int>(size + 1, 0)),
+        vertice_count(size) {}
 
   void ReadGraph(size_t n, size_t m) {
     for (size_t i = 1; i <= n; ++i) {
@@ -30,10 +33,10 @@ struct Graph {
   }
 };
 
-void CalculateCapacities(size_t n, Graph& graph) {
-  for (size_t k = 1; k <= n; ++k) {
-    for (size_t i = 1; i <= n; ++i) {
-      for (size_t j = 1; j <= n; ++j) {
+void CalculateCapacities(Graph& graph) {
+  for (size_t k = 1; k <= graph.vertice_count; ++k) {
+    for (size_t i = 1; i <= graph.vertice_count; ++i) {
+      for (size_t j = 1; j <= graph.vertice_count; ++j) {
         graph.capacity_matrix[i][j] = std::max(
             graph.capacity_matrix[i][j],
             std::min(graph.capacity_matrix[i][k], graph.capacity_matrix[k][j]));
@@ -65,7 +68,7 @@ int main() {
 
   graph.ReadGraph(n, m);
 
-  CalculateCapacities(n, graph);
+  CalculateCapacities(graph);
 
   PrintResults(k, graph);
 
