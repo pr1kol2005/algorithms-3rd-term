@@ -7,38 +7,47 @@ using Matrix = std::vector<std::vector<T>>;
 
 const int kMaxCapacity = 201;
 
-void FillMatrix(size_t n, size_t m, Matrix<int>& capacity) {
-  for (size_t i = 1; i <= n; ++i) {
-    capacity[i][i] = kMaxCapacity;
-  }
+struct Graph {
+  Matrix<int> capacity_matrix;
 
-  for (size_t i = 0; i < m; ++i) {
-    int u = 0;
-    int v = 0;
-    int w = 0;
-    std::cin >> u >> v >> w;
-    capacity[u][v] = std::max(capacity[u][v], w);
-    capacity[v][u] = std::max(capacity[v][u], w);
-  }
-}
+  Graph() = default;
 
-void CalculateCapacities(size_t n, Matrix<int>& capacity) {
+  explicit Graph(int size) : capacity_matrix(size + 1, std::vector<int>(size + 1, 0)) {}
+
+  void ReadGraph(size_t n, size_t m) {
+    for (size_t i = 1; i <= n; ++i) {
+      capacity_matrix[i][i] = kMaxCapacity;
+    }
+
+    for (size_t i = 0; i < m; ++i) {
+      int u = 0;
+      int v = 0;
+      int w = 0;
+      std::cin >> u >> v >> w;
+      capacity_matrix[u][v] = std::max(capacity_matrix[u][v], w);
+      capacity_matrix[v][u] = std::max(capacity_matrix[v][u], w);
+    }
+  }
+};
+
+void CalculateCapacities(size_t n, Graph& graph) {
   for (size_t k = 1; k <= n; ++k) {
     for (size_t i = 1; i <= n; ++i) {
       for (size_t j = 1; j <= n; ++j) {
-        capacity[i][j] =
-            std::max(capacity[i][j], std::min(capacity[i][k], capacity[k][j]));
+        graph.capacity_matrix[i][j] = std::max(
+            graph.capacity_matrix[i][j],
+            std::min(graph.capacity_matrix[i][k], graph.capacity_matrix[k][j]));
       }
     }
   }
 }
 
-void PrintResults(size_t k, const Matrix<int>& capacity) {
+void PrintResults(size_t k, const Graph& graph) {
   for (size_t i = 0; i < k; ++i) {
     int u = 0;
     int v = 0;
     std::cin >> u >> v;
-    std::cout << capacity[u][v] << '\n';
+    std::cout << graph.capacity_matrix[u][v] << '\n';
   }
 }
 
@@ -52,13 +61,13 @@ int main() {
   size_t k = 0;
   std::cin >> n >> m >> k;
 
-  Matrix<int> capacity(n + 1, std::vector<int>(n + 1, 0));
+  Graph graph(n);
 
-  FillMatrix(n, m, capacity);
+  graph.ReadGraph(n, m);
 
-  CalculateCapacities(n, capacity);
+  CalculateCapacities(n, graph);
 
-  PrintResults(k, capacity);
+  PrintResults(k, graph);
 
   return 0;
 }
