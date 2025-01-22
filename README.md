@@ -8,4 +8,3 @@
 | 4. | [Graphs. Spanning tree, LCA.](https://contest.yandex.ru/contest/70276/problems/) |
 | 5. | [Graphs. Shortest paths.](https://contest.yandex.ru/contest/71393/problems/) |
 | 6. | [Graphs. Mathings, flow networks.](https://contest.yandex.ru/contest/72301/problems/) |
-s
