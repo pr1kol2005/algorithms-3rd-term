@@ -1,4 +1,4 @@
-## Homework for algorithms and data structures course completed in the 3rd semester.
+# Homework for Algorithms and Data Structures course completed in the 3rd semester
 
 | Contest | Contents |
 | ------- | ------- |
